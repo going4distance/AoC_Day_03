@@ -12,22 +12,19 @@ namespace AdventOfCode_Day03
             char[,] fabric = new char[rows, columns];
 
             int startL = 0; int startT = 0; int width = 0; int height = 0; int idNumber = 0;
-
             string path = @"C:\Users\computer\source\repos\AdventOfCode-Day03\Advent_Calendar_-_day_3_input.txt";
-            string thisLine;
+            
             //  ========  Done Initialization  ==================
-            Console.WriteLine("Initialization complete.");
-
-            StreamReader sr = File.OpenText(path);
-            while((thisLine = sr.ReadLine()) != null) {
-                ParseLine(ref idNumber, ref startL, ref startT, ref width, ref height, thisLine);
+            string readText = File.ReadAllText(path);
+            string[] allFileLines = readText.Split('\n');
+            //  ========  Begin Matrix Fill  ==================
+            for (int f = 0; f < allFileLines.Length; f++) {
+                ParseLine(ref idNumber, ref startL, ref startT, ref width, ref height, allFileLines[f]);
                 // marks the fabric based on the current line's pattern
-                for (int x = 0; x<rows; x++)
+                for (int x = startT; x<startT+height; x++)
                 {
-                    for(int y = 0; y < columns; y++)
+                    for(int y = startL; y < startL+width; y++)
                     {
-                        if(CheckRange(startL, startT, width, height, x, y))
-                        {   // In range to cut
                             if(fabric[x,y] == '\0')
                             {   // if space is not yet in use.
                                 fabric[x, y] = '1';
@@ -35,11 +32,10 @@ namespace AdventOfCode_Day03
                             else { // if space used by another cut
                             fabric[x, y] = '#';
                             }
-                        }
                     }
                 }
-            }   // End while loop
-            sr.Close();
+            }   // End for loop
+            // ================  Done filling matrix  ========================
             //  Count # in fabric
             int overLapCount = 0;
             for (int x = 0; x < rows; x++)
@@ -55,23 +51,19 @@ namespace AdventOfCode_Day03
             Console.WriteLine("There are {0} #'s present in the fabric \n", overLapCount);
 
 //  =========================   BEGIN PART 2  =======================================================
-            sr = File.OpenText(path); bool NoOverlap;
-            while ((thisLine = sr.ReadLine()) != null)
-            {
-                ParseLine(ref idNumber, ref startL, ref startT, ref width, ref height, thisLine);
+            bool NoOverlap;
+            for (int f = 0; f < allFileLines.Length; f++){
+                ParseLine(ref idNumber, ref startL, ref startT, ref width, ref height, allFileLines[f]);
                 NoOverlap = true;
-                for (int x = 0; x < rows; x++)
+                for (int x = startT; x < startT + height; x++)
                 {
-                    for (int y = 0; y < columns; y++)
-                    {
-                        if (CheckRange(startL, startT, width, height, x, y))
-                        {   
+                    for (int y = startL; y < startL+width; y++)
+                    { 
                             if (fabric[x, y] == '#')
                             {   // if space is used by multiple claims
                                 NoOverlap = false;
                                 break;
                             }
-                        }
                     }
                 }
                 if (NoOverlap)
@@ -79,10 +71,7 @@ namespace AdventOfCode_Day03
                     Console.WriteLine("Found an uncontested claim.  ID#: {0}", idNumber);
                     break;  // no need to search the rest of the file, because we assume(per the directions) only a single claim can be correct.
                 }
-            }   // End while loop
-            sr.Close();
-
-
+            }   // End for loop
             Console.WriteLine("\nPress ENTER to quit.");
             Console.ReadLine();
         }   // END of MAIN
@@ -117,23 +106,7 @@ namespace AdventOfCode_Day03
             else{   // Data is wrong size
                 return (false);
             }
-
             return (true);
         }   // END parseLine ------------------
-
-        /// <summary>
-        /// determines if the current coordinates are in range of the current "claim". 
-        /// </summary>
-        static bool CheckRange(int left, int top, int wide, int tall, int coorX, int coorY)
-        {   
-            if(coorY >= left && coorY < (left + wide))
-            {
-                if(coorX >= top && coorX < (top + tall))
-                {
-                    return (true);
-                }
-            }
-            return (false);
-        }
     }
 }
